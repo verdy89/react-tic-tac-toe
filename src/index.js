@@ -141,7 +141,13 @@ class Game extends React.Component {
       return { winner: squares[winSquares[0]], winSquares: winSquares };
     }
 
-    return { winner: null, winSquares: [] };
+    for (let i = 0; i < squares.length; i++) {
+      if (squares[i] === null) {
+        return { winner: null, winSquares: [] };
+      }
+    }
+
+    return { winner: 'Draw', winSquares: [] };
   }
 
   render() {
