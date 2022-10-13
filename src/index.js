@@ -4,7 +4,10 @@ import './index.css';
 
 function Square(props) {
   return (
-    <button className="square" onClick={ props.onClick }>
+    <button
+      className={"square" + (props.isWinSquare ? ' win-square' : '')}
+      onClick={ props.onClick }
+    >
       { props.value }
     </button>
   );
@@ -16,6 +19,7 @@ class Board extends React.Component {
       <Square
         key={ 'square' + i }
         value={ this.props.squares[i] }
+        isWinSquare={ this.props.winSquares.includes(i) }
         onClick={ () => this.props.onClick(i) }
       />
     )
@@ -72,6 +76,7 @@ class Game extends React.Component {
       xIsNext: true,
       selectedStepNumber: null,
       movesAscendingOrder: true,
+      winSquares: Array(3).fill(null),
     };
   }
 
@@ -80,7 +85,7 @@ class Game extends React.Component {
     const current = history[history.length - 1];
     const newSquares = current.squares.slice();
 
-    if (calculateWinner(current.squares) || newSquares[i]) return;
+    if (this.calculateWinner(current.squares)['winner'] || newSquares[i]) return;
     newSquares[i] = this.state.xIsNext ? 'X' : 'O';
     const [row, col] = convertIndexToRowCol(i);
 
@@ -110,10 +115,41 @@ class Game extends React.Component {
     console.log(this.state.movesAscendingOrder)
   }
 
+  calculateWinner(squares) {
+    const lines = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+    let winSquares = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const [a, b, c] = lines[i];
+
+      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+        // 2列以上揃えて勝つ可能性があるので、この時点で return はできない
+        winSquares = winSquares.concat(lines[i]);
+      }
+    }
+
+    if (winSquares.length > 0) {
+      return { winner: squares[winSquares[0]], winSquares: winSquares };
+    }
+
+    return { winner: null, winSquares: [] };
+  }
+
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
+    const winnerInfo = this.calculateWinner(current.squares);
+    const winner = winnerInfo['winner']
+    const winSquares = winnerInfo['winSquares']
 
     let status;
     if (winner) {
@@ -127,6 +163,7 @@ class Game extends React.Component {
         <div className="game-board">
           <Board
             squares={ current.squares }
+            winSquares={ winSquares }
             onClick={ (i) => this.handleClick(i) }
           />
         </div>
@@ -143,29 +180,6 @@ class Game extends React.Component {
       </div>
     );
   }
-}
-
-function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
-    }
-  }
-
-  return null;
 }
 
 function convertIndexToRowCol(i) {
