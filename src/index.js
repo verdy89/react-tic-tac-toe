@@ -36,7 +36,9 @@ class Board extends React.Component {
 }
 
 function Moves(props) {
-  const moves = props.history.map((step, stepNumber) => {
+  const history = props.isAscendingOrder ? props.history : props.history.slice().reverse();
+  const moves = history.map((step, index) => {
+    const stepNumber = props.isAscendingOrder ? index : history.length - 1 - index;
     const [row, col] = step.move;
     const player = stepNumber % 2 === 0 ? 'O' : 'X';
     const description = stepNumber
@@ -69,6 +71,7 @@ class Game extends React.Component {
       stepNumber: 0,
       xIsNext: true,
       selectedStepNumber: null,
+      movesAscendingOrder: true,
     };
   }
 
@@ -77,7 +80,7 @@ class Game extends React.Component {
     const current = history[history.length - 1];
     const newSquares = current.squares.slice();
 
-    if (calculateWinner(current) || newSquares[i]) return;
+    if (calculateWinner(current.squares) || newSquares[i]) return;
     newSquares[i] = this.state.xIsNext ? 'X' : 'O';
     const [row, col] = convertIndexToRowCol(i);
 
@@ -98,6 +101,13 @@ class Game extends React.Component {
       xIsNext: (stepNumber % 2) === 0,
       selectedStepNumber: stepNumber,
     });
+  }
+
+  reverseMoves() {
+    this.setState({
+      movesAscendingOrder: !this.state.movesAscendingOrder
+    })
+    console.log(this.state.movesAscendingOrder)
   }
 
   render() {
@@ -124,9 +134,11 @@ class Game extends React.Component {
           <div>{ status }</div>
           <Moves
             history={ this.state.history }
+            isAscendingOrder={ this.state.movesAscendingOrder }
             selectedStepNumber={ this.state.selectedStepNumber }
             jumpTo={ (stepNumber) => this.jumpTo(stepNumber) }
           />
+          <button onClick={ () => this.reverseMoves() }>Reverse Moves</button>
         </div>
       </div>
     );
