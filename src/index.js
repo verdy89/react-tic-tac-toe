@@ -43,11 +43,32 @@ class Board extends React.Component {
   }
 }
 
+function Moves(props) {
+  const moves = props.history.map((step, stepNumber) => {
+    const [row, col] = step.move;
+    const player = stepNumber % 2 === 0 ? 'O' : 'X';
+    const description = stepNumber
+      ? 'Go to move #' + stepNumber + ' : ' + player + '(' + row + ', ' + col + ')'
+      : 'Go to game start';
+
+    return (
+      <li key={ stepNumber }>
+        <button onClick={ () => props.jumpTo(stepNumber) }>{ description }</button>
+      </li>
+    );
+  });
+
+  return (
+    <ol>{ moves }</ol>
+  )
+}
+
 class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       history: [{
+        move: Array(2).fill(null),
         squares: Array(9).fill(null),
       }],
       stepNumber: 0,
@@ -62,9 +83,11 @@ class Game extends React.Component {
 
     if (calculateWinner(current) || newSquares[i]) return;
     newSquares[i] = this.state.xIsNext ? 'X' : 'O';
+    const [row, col] = convertIndexToRowCol(i);
 
     this.setState({
       history: history.concat([{
+        move: [row, col],
         squares: newSquares,
       }]),
       stepNumber: history.length,
@@ -84,15 +107,6 @@ class Game extends React.Component {
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
 
-    const moves = history.map((step, move) => {
-      const description = move ? 'Go to move #' + move : 'Go to game start';
-      return (
-        <li key={ move }>
-          <button onClick={ () => this.jumpTo(move) }>{ description }</button>
-        </li>
-      );
-    });
-
     let status;
     if (winner) {
       status = 'Winner: ' + winner;
@@ -110,7 +124,10 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{ status }</div>
-          <ol>{ moves }</ol>
+          <Moves
+            history={ this.state.history }
+            jumpTo={ (move) => this.jumpTo(move) }
+          />
         </div>
       </div>
     );
@@ -138,6 +155,12 @@ function calculateWinner(squares) {
   }
 
   return null;
+}
+
+function convertIndexToRowCol(i) {
+  const row = Math.floor(i / 3);
+  const col = i - row * 3;
+  return [row, col];
 }
 
 // ========================================
