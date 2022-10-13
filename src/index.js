@@ -53,7 +53,10 @@ function Moves(props) {
 
     return (
       <li key={ stepNumber }>
-        <button onClick={ () => props.jumpTo(stepNumber) }>{ description }</button>
+        <button
+          onClick={ () => props.jumpTo(stepNumber) }
+          className={ props.selectedStepNumber === stepNumber ? 'selected' : '' }
+        >{ description }</button>
       </li>
     );
   });
@@ -73,6 +76,7 @@ class Game extends React.Component {
       }],
       stepNumber: 0,
       xIsNext: true,
+      selectedStepNumber: null,
     };
   }
 
@@ -92,13 +96,15 @@ class Game extends React.Component {
       }]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
+      selectedStepNumber: null,
     });
   }
 
-  jumpTo(step) {
+  jumpTo(stepNumber) {
     this.setState({
-      stepNumber: step,
-      xIsNext: (step % 2) === 0,
+      stepNumber: stepNumber,
+      xIsNext: (stepNumber % 2) === 0,
+      selectedStepNumber: stepNumber,
     });
   }
 
@@ -126,7 +132,8 @@ class Game extends React.Component {
           <div>{ status }</div>
           <Moves
             history={ this.state.history }
-            jumpTo={ (move) => this.jumpTo(move) }
+            selectedStepNumber={ this.state.selectedStepNumber }
+            jumpTo={ (stepNumber) => this.jumpTo(stepNumber) }
           />
         </div>
       </div>
