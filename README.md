@@ -1,11 +1,12 @@
 # React Tic-Tac-Toe
 
 React のチュートリアルと追加課題を実装したレポジトリです。
+
 React チュートリアル: https://ja.reactjs.org/tutorial/tutorial.html
 
-![sample](./sample_image.png)
-
 master ブランチのコミット履歴を見ると、チュートリアルの区切りごとに要点付きでコミットしているのが一覧できるようになっています。
+
+![sample](./sample_image.png)
 
 # Getting Started with Create React App
 
